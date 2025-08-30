@@ -45,8 +45,8 @@ This creates multiple challenges:
 
 ---
 
-## 🖼 Mockup (Example)
-*(Add screenshot or link to prototype UI here — e.g., dashboard view, WhatsApp reminder interface)*  
+## 🖼 Mockup/Wireframe (Example)
+ (https://drive.google.com/file/d/1FIpvVc9s6LS17CIUDM6RElw_f5HUrkRl/view?usp=sharing)
 
 ---
 
