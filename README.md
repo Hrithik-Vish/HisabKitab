@@ -103,7 +103,7 @@ At **MumbaiHacks**, HisabKitab focuses on leveraging AI to empower micro-entrepr
 
 ## 📞 Contact & Contribution
 For questions, suggestions, or contributions:  
-📧 Email: team@hisabkitab.com  
+📧 Email: hisabkitab.ai@gmail.com 
 🌐 GitHub: [https://github.com/Hrithik-Vish/HisabKitab](https://github.com/Hrithik-Vish/HisabKitab)
 
 
