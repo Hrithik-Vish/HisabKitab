@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>HisabKitab — Dashboard</title>
+
+<link href="assets/css/bootstrap.min.css" rel="stylesheet">
+<link href="assets/css/dashboard.css" rel="stylesheet">
+
+<style>
+  .earn-profit { color:#17803d; font-weight:700; display:inline-flex; align-items:center; gap:8px; }
+  .earn-loss   { color:#c62828; font-weight:700; display:inline-flex; align-items:center; gap:8px; }
+  .earn-zero   { color:#455a64; font-weight:700; display:inline-flex; align-items:center; gap:8px; }
+
+  .earn-arrow { font-size:18px; line-height:1; transition: transform .22s; display:inline-block; }
+  .pop { transform: translateY(-3px) scale(1.06); }
+
+  .arrow-circle { display:inline-grid; place-items:center; width:30px; height:30px; border-radius:999px;
+                  background: rgba(0,0,0,0.03); }
+
+  .analytics-link { margin-top:12px; background:#1b6f4a; color:#fff; border:0; padding:8px 12px; border-radius:8px; font-weight:700; }
+  .analytics-link:hover { background:#145f39; }
+</style>
+</head>
+<body>
+
+<button id="proToggleBtn">🚀 Free | Pro</button>
+
+<!-- Sidebar -->
+<div id="sidebar-container"></div>
+
+<!-- Main -->
+<main class="main-content container">
+
+  <h3 class="mb-3">📊 Shop Dashboard</h3>
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="card p-3">
+        <h5>👥 Total Customers</h5>
+        <h2 id="customerCount">0</h2>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card p-3">
+        <h5>🛒 Total Orders</h5>
+        <h2 id="orderCount">0</h2>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card p-3">
+        <h5>💰 Pending Payments</h5>
+        <h2 id="pendingTotal">₹0</h2>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card p-3">
+        <h5>💵 Daily Earnings</h5>
+        <h2 id="dailyEarnings" class="earn-zero">
+          <span class="arrow-circle"><span id="dailyArrow" class="earn-arrow">—</span></span>
+          <span id="dailyLabel">₹0 balance</span>
+        </h2>
+      </div>
+    </div>
+  </div>
+
+  <hr class="my-3">
+
+  <!-- Add Customer -->
+  <div style="max-width:420px;" class="mb-4">
+    <h4>➕ Add Customer</h4>
+    <div class="card p-3">
+      <input id="custName" class="form-control mb-2" placeholder="Customer name">
+      <input id="custPhone" class="form-control mb-2" placeholder="Phone / WhatsApp">
+      <input id="custAmount" type="number" class="form-control mb-2" placeholder="Pending amount (₹)">
+      <button id="addCustomerBtn" class="btn btn-success">Add Customer</button>
+    </div>
+  </div>
+
+  <!-- Analytics Link -->
+  <div class="card p-3" style="max-width:480px;">
+    <h5>📈 Analytics</h5>
+    <p class="text-muted-small">Charts & deeper analytics (daily free, weekly/monthly Pro)</p>
+    <button class="analytics-link" onclick="location.href='charts.html'">Open Analytics (Charts)</button>
+  </div>
+
+</main>
+
+<script>
+/* helpers */
+function safeParse(key,fallback){ try{ const raw=localStorage.getItem(key); if(raw==null) return fallback; return JSON.parse(raw)||fallback;}catch(e){return fallback;} }
+function safeSet(k,v){ localStorage.setItem(k,JSON.stringify(v)); }
+
+/* ensure keys exist */
+if(!localStorage.getItem('stats')) safeSet('stats',{customers:0,orders:0,earnings:0});
+safeParse('customers',[]);
+safeParse('orders',[]);
+safeParse('pending',[]);
+
+/* compute pending (customers + pending orders + legacy) */
+function computePending(){
+  const customers = safeParse('customers',[]);
+  const orders = safeParse('orders',[]);
+  const legacy = safeParse('pending',[]);
+  let sum=0;
+  customers.forEach(c=> sum += Number(c.amount ?? c.pending ?? 0));
+  orders.forEach(o=>{
+    const pay = o.paymentStatus || o.payment || (o.status==='Paid'?'Paid':o.status) || 'Pending';
+    if(String(pay).toLowerCase()==='pending') sum += Number(o.amount || o.price || 0);
+  });
+  legacy.forEach(x=> sum += Number(x||0));
+  return sum;
+}
+
+/* update dashboard */
+function updateDashboard(){
+  const s = safeParse('stats',{customers:0,orders:0,earnings:0});
+  document.getElementById('customerCount').innerText = s.customers;
+  document.getElementById('orderCount').innerText = s.orders;
+
+  const pending = computePending();
+  document.getElementById('pendingTotal').innerText = '₹' + pending;
+
+  const earnings = Number(s.earnings || 0);
+  const diff = earnings - pending;
+  const wrap = document.getElementById('dailyEarnings');
+  const arrow = document.getElementById('dailyArrow');
+  const label = document.getElementById('dailyLabel');
+
+  if(diff > 0){
+    wrap.className = 'earn-profit';
+    arrow.innerText = '🔼';
+    label.innerText = `₹${diff} profit`;
+  } else if(diff < 0){
+    wrap.className = 'earn-loss';
+    arrow.innerText = '🔽';
+    label.innerText = `₹${Math.abs(diff)} loss`;
+  } else {
+    wrap.className = 'earn-zero';
+    arrow.innerText = '—';
+    label.innerText = '₹0 balance';
+  }
+
+  arrow.classList.add('pop'); setTimeout(()=>arrow.classList.remove('pop'),300);
+  label.classList.add('pop'); setTimeout(()=>label.classList.remove('pop'),300);
+}
+
+/* add customer */
+document.getElementById('addCustomerBtn').addEventListener('click', ()=>{
+  const name = document.getElementById('custName').value.trim();
+  const phone = document.getElementById('custPhone').value.trim();
+  const amount = Number(document.getElementById('custAmount').value || 0);
+  if(!name || !phone || !amount){ alert('Please fill all fields'); return; }
+  const customers = safeParse('customers',[]);
+  customers.push({name,phone,amount});
+  safeSet('customers',customers);
+  const legacy = safeParse('pending',[]); legacy.push(amount); safeSet('pending',legacy);
+  const stats = safeParse('stats',{customers:0,orders:0,earnings:0}); stats.customers = Number(stats.customers||0)+1; safeSet('stats',stats);
+  document.getElementById('custName').value=''; document.getElementById('custPhone').value=''; document.getElementById('custAmount').value='';
+  updateDashboard();
+  alert('Customer added.');
+});
+
+/* load sidebar */
+fetch('components/sidebar.html').then(r=>r.text()).then(html=>document.getElementById('sidebar-container').innerHTML = html);
+
+/* init */
+updateDashboard();
+
+/* live update across tabs */
+window.addEventListener('storage', (e)=>{
+  if(['orders','customers','pending','stats'].includes(e.key)) updateDashboard();
+});
+</script>
+
+</body>
+</html>

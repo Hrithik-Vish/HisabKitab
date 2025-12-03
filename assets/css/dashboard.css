@@ -1,0 +1,122 @@
+/* =====================
+   GLOBAL LAYOUT
+===================== */
+:root{
+  --sidebar-w: 260px;
+  --sidebar-bg: #082217; /* dark green */
+  --accent: #1b6f4a;
+}
+
+*{box-sizing:border-box}
+html,body{
+  height:100%;
+  margin:0;
+  font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background:#f6f7f8;
+  color:#152a1f;
+}
+
+/* SIDEBAR (fixed) */
+#sidebar-container{
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: var(--sidebar-w);
+  height: 100vh;
+  background: var(--sidebar-bg);
+  color: #fff;
+  padding: 20px 14px;
+  overflow-y: auto;
+  z-index: 1100;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+/* LOGO inside sidebar */
+#sidebar-container #logo{
+  display:block;
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  margin: 6px auto 12px auto;
+}
+
+/* SIDEBAR LINKS */
+#sidebar-container .nav{
+  padding-left:0;
+  margin-top:6px;
+}
+#sidebar-container .nav-link{
+  color:#e9f6ee;
+  font-size:16px;
+  padding:10px 12px;
+  border-radius:8px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  text-decoration:none;
+}
+#sidebar-container .nav-link:hover{
+  background: rgba(255,255,255,0.04);
+  transform: translateX(6px);
+}
+
+/* MAIN CONTENT (to the right of sidebar) */
+.main-content{
+  margin-left: calc(var(--sidebar-w) + 20px);
+  padding: 28px;
+  min-height:100vh;
+}
+
+/* PRO BUTTON top-right */
+#proToggleBtn, #proToggleBtn:focus{
+  position: fixed;
+  right: 20px;
+  top: 16px;
+  z-index:1200;
+  border-radius:10px;
+  background: #1b6f4a;
+  color: #fff;
+  padding: 8px 14px;
+  border: none;
+  box-shadow: 0 6px 18px rgba(11,62,34,0.18);
+}
+
+/* CARDS */
+.card{
+  border-radius:12px;
+  background:white;
+  border: 0;
+  box-shadow: 0 6px 20px rgba(12,33,20,0.06);
+  padding:18px;
+}
+.card h5{margin:0 0 6px 0;color:#344b3b;font-weight:600}
+.card h2{margin:6px 0 0 0;font-size:28px;color:#0f2b17}
+
+/* Buttons */
+.btn-ghost{
+  background: transparent;
+  border:1px solid #1b6f4a;
+  color: #1b6f4a;
+  padding:8px 12px;
+  border-radius:8px;
+}
+
+/* Small utilities */
+.text-muted-small{color:#6b776e;font-size:13px}
+
+/* Forms */
+.form-control{
+  padding:10px 12px;
+  border-radius:8px;
+  border:1px solid #e6efe6;
+  background:#fff;
+}
+.form-control:focus{outline:none; box-shadow: 0 4px 12px rgba(27,111,74,0.08); border-color:var(--accent);}
+
+/* responsiveness */
+@media (max-width: 992px){
+  #sidebar-container{display:none}
+  .main-content{margin-left:20px;padding:16px}
+  #proToggleBtn{right:10px}
+}

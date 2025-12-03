@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Inventory - HisabKitab</title>
+  <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body onload="displayInventory()">
+<tbody id="stockTableBody"></tbody>
+
+<nav class="navbar navbar-light bg-white shadow-sm px-3 fixed-top">
+  <span class="fs-4 fw-bold">Inventory</span>
+  <a class="btn btn-warning fw-bold rounded-pill px-3" href="index.html">← Back to Dashboard</a>
+</nav>
+
+<div class="container mt-5 pt-4">
+
+  <!-- Inventory Form -->
+  <div class="card p-3 mb-4 shadow-sm">
+    <h5 class="fw-bold mb-3">Add Inventory Stock</h5>
+    <div class="row g-2">
+      <div class="col-md-6"><input id="stockItem" class="form-control" placeholder="Item Name"></div>
+      <div class="col-md-4"><input id="stockQty" type="number" class="form-control" placeholder="Quantity"></div>
+      <div class="col-md-2"><button class="btn btn-primary w-100" onclick="addInventory()">Add</button></div>
+    </div>
+  </div>
+
+  <!-- Inventory Table -->
+  <div class="card p-3 shadow-sm">
+    <table class="table">
+      <thead class="table-light">
+        <tr>
+          <th>Item</th>
+          <th>Quantity</th>
+          <th>Alert</th>
+        </tr>
+      </thead>
+      <tbody id="stockTableBody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script src="assets/js/inventory.js"></script>
+</body>
+</html>

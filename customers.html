@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Customers — HisabKitab</title>
+
+<link href="assets/css/bootstrap.min.css" rel="stylesheet">
+<link href="assets/css/dashboard.css" rel="stylesheet">
+
+</head>
+<body>
+
+<div id="sidebar-container"></div>
+
+<div class="main-content" style="margin-top:80px">
+
+  <h3 class="mb-3">➕ Add Customer</h3>
+
+  <div class="card shadow p-3 mb-4">
+    <div class="row">
+
+      <div class="col-md-4">
+        <label>Name</label>
+        <input type="text" id="custName" class="form-control">
+      </div>
+
+      <div class="col-md-4">
+        <label>Phone (WhatsApp)</label>
+        <input type="text" id="custPhone" class="form-control">
+      </div>
+
+      <div class="col-md-4">
+        <label>Amount (Pending)</label>
+        <input type="number" id="custAmount" class="form-control">
+      </div>
+
+    </div>
+
+    <button class="btn btn-primary mt-3 w-100" id="addCustomerBtn">Add Customer</button>
+  </div>
+
+  <h4>📋 Customer List</h4>
+  <table class="table table-bordered">
+    <thead>
+      <tr><th>Name</th><th>Phone</th><th>Pending Amount</th></tr>
+    </thead>
+    <tbody id="customerList"></tbody>
+  </table>
+
+</div>
+
+<script >
+/* Load existing */
+const list = JSON.parse(localStorage.getItem("customers") || "[]");
+const customerBody = document.getElementById("customerList");
+let pending = JSON.parse(localStorage.getItem("pending") || "0");
+
+list.forEach(c=>{
+  customerBody.innerHTML += `<tr><td>${c.name}</td><td>${c.phone}</td><td>₹ ${c.amount}</td></tr>`;
+});
+
+/* Add new customer */
+document.getElementById("addCustomerBtn").addEventListener("click",()=>{
+
+  const n = document.getElementById("custName").value.trim();
+  const p = document.getElementById("custPhone").value.trim();
+  const a = document.getElementById("custAmount").value;
+
+  if(!n || !p || !a){
+    alert("⚠ Fill all fields!");
+    return;
+  }
+
+  /* Update UI */
+  customerBody.innerHTML += `<tr><td>${n}</td><td>${p}</td><td>₹ ${a}</td></tr>`;
+
+  /* Save */
+  let all = JSON.parse(localStorage.getItem("customers") || "[]");
+  all.push({name:n, phone:p, amount:parseInt(a)});
+  localStorage.setItem("customers", JSON.stringify(all));
+
+  /* Update Pending Payments */
+  pending += parseInt(a);
+  localStorage.setItem("pending", JSON.stringify(pending));
+
+  /* Reset */
+  document.getElementById("custName").value="";
+  document.getElementById("custPhone").value="";
+  document.getElementById("custAmount").value="";
+
+  alert("✅ Customer Added & Pending Payments Updated!");
+});
+</script>
+
+<script>
+fetch("components/sidebar.html").then(r=>r.text()).then(t=>document.getElementById("sidebar-container").innerHTML = t);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Orders — HisabKitab</title>
+
+<link href="assets/css/bootstrap.min.css" rel="stylesheet">
+<link href="assets/css/dashboard.css" rel="stylesheet">
+
+<style>
+.orders-top { display:flex; gap:24px; align-items:flex-start; margin-bottom:18px; }
+.orders-left { flex:1 1 0%; min-width:420px; }
+.orders-right { width:320px; }
+.stat-card { margin-bottom:16px; }
+.table thead.table-dark th { background:#1f2a28; color:#fff; }
+.card .form-label { font-weight:700; color:#2f4b3e; }
+.status-select { min-width:110px; }
+</style>
+</head>
+<body>
+
+<!-- sidebar mount -->
+<div id="sidebar-container"></div>
+
+<!-- main -->
+<main class="main-content container">
+
+  <h3 class="mb-3">🧾 Add Order</h3>
+
+  <!-- Top row -->
+  <div class="orders-top">
+
+    <!-- LEFT: form + list -->
+    <div class="orders-left">
+
+      <div class="card shadow p-3 mb-3">
+        <label class="form-label">Select Product</label>
+        <select id="itemDropdown" class="form-select mb-3"></select>
+
+        <label class="form-label">Amount (₹)</label>
+        <input id="orderAmount" class="form-control mb-3" disabled>
+
+        <label class="form-label">Payment Status</label>
+        <select id="orderPaymentStatus" class="form-select mb-3">
+          <option value="Pending">Pending</option>
+          <option value="Paid">Paid</option>
+        </select>
+
+        <button id="addBtn" class="btn btn-success w-100">Add Order</button>
+      </div>
+
+      <div class="card shadow p-3 mb-3">
+        <h5 style="margin-bottom:8px">📋 Orders List</h5>
+        <div style="overflow:auto">
+          <table class="table table-bordered">
+            <thead class="table-dark">
+              <tr>
+                <th>Item</th>
+                <th>Amount</th>
+                <th>Payment Status</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="orderTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: stats -->
+    <div class="orders-right">
+
+      <div class="card stat-card shadow p-3">
+        <h5>Total Orders</h5>
+        <h2 id="orderCountBox">0</h2>
+      </div>
+
+      <div class="card stat-card shadow p-3">
+        <h5>Total Earnings</h5>
+        <h2 id="earningsBox">₹0</h2>
+      </div>
+
+      <div class="card stat-card shadow p-3">
+        <h5>Stock Snapshot</h5>
+        <div id="stockSnapshot" class="text-muted-small"></div>
+        <button class="btn btn-ghost mt-2" onclick="location.href='inventory.html'">Open Inventory</button>
+      </div>
+
+    </div>
+
+  </div>
+
+</main>
+
+<script>
+/* ---------- Helpers ---------- */
+function safeParse(key, fallback){
+  try{
+    const raw = localStorage.getItem(key);
+    if(raw === null || raw === undefined) return fallback;
+    const v = JSON.parse(raw);
+    return (v === null || v === undefined) ? fallback : v;
+  } catch(e){
+    localStorage.setItem(key, JSON.stringify(fallback));
+    return fallback;
+  }
+}
+function safeSet(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
+
+/* ---------- Defaults ---------- */
+const defaultInventory = [
+  {id:"prod-atta", name:"Wheat Flour (Atta)", qty:10},
+  {id:"prod-rice", name:"Basmati Rice", qty:10},
+  {id:"prod-dal", name:"Toor Dal", qty:10},
+  {id:"prod-lays", name:"Lays Chips (45g)", qty:10},
+  {id:"prod-parleg", name:"Parle-G Biscuits", qty:10},
+  {id:"prod-nachos", name:"Mad Angles (85g)", qty:10},
+  {id:"prod-milk", name:"Amul Milk (1L)", qty:10},
+  {id:"prod-curd", name:"Amul Curd (200g)", qty:10},
+  {id:"prod-butter", name:"Amul Butter (100g)", qty:10}
+];
+
+if(!localStorage.getItem('inventory')) safeSet('inventory', defaultInventory);
+if(!localStorage.getItem('orders')) safeSet('orders', []);
+if(!localStorage.getItem('stats')) safeSet('stats', {customers:0, orders:0, earnings:0});
+if(!localStorage.getItem('pending')) safeSet('pending', []);
+
+/* ---------- Price map ---------- */
+const prices = {
+  "prod-atta":45, "prod-rice":65, "prod-dal":110,
+  "prod-lays":20, "prod-parleg":10, "prod-nachos":30,
+  "prod-milk":54, "prod-curd":25, "prod-butter":55
+};
+
+/* ---------- DOM ---------- */
+const dropdown = document.getElementById('itemDropdown');
+const amountInput = document.getElementById('orderAmount');
+const paymentStatusSelect = document.getElementById('orderPaymentStatus');
+const orderTable = document.getElementById('orderTable');
+const orderCountBox = document.getElementById('orderCountBox');
+const earningsBox = document.getElementById('earningsBox');
+const stockSnapshot = document.getElementById('stockSnapshot');
+const addBtn = document.getElementById('addBtn');
+
+/* ---------- Populate dropdown ---------- */
+function populateDropdown(){
+  const inventory = safeParse('inventory', defaultInventory);
+  dropdown.innerHTML = '';
+  inventory.forEach(i=>{
+    const opt = document.createElement('option');
+    opt.value = i.id;
+    opt.textContent = `${i.name} (${i.qty} left)`;
+    opt.disabled = (i.qty <= 0);
+    dropdown.appendChild(opt);
+  });
+  dropdown.dispatchEvent(new Event('change'));
+}
+dropdown.addEventListener('change', ()=> {
+  const id = dropdown.value;
+  amountInput.value = prices[id] || 0;
+});
+
+/* ---------- Stock snapshot ---------- */
+function updateStockSnapshot(){
+  const inv = safeParse('inventory', defaultInventory);
+  const lines = inv.slice(0,6).map(i => `${i.name}: ${i.qty}`);
+  stockSnapshot.innerHTML = lines.join('<br>') || 'No stock';
+}
+
+/* ---------- Orders UI render ---------- */
+function updateOrdersUI(){
+  const orders = safeParse('orders', []);
+  orderTable.innerHTML = '';
+
+  orders.forEach((o, idx) => {
+    const name = o.item || o.product || o.name || '—';
+    const amt  = (o.amount !== undefined) ? o.amount : (o.price || 0);
+    const payStatus = o.paymentStatus || (o.payment || (o.status === 'Paid' ? 'Paid' : 'Pending')) || 'Pending';
+    const status = o.status || (payStatus === 'Paid' ? 'Completed' : 'Pending');
+
+    const tr = document.createElement('tr');
+
+    const tdName = document.createElement('td'); tdName.innerText = name;
+    const tdAmt  = document.createElement('td'); tdAmt.innerText = '₹' + amt;
+
+    // Payment status select (editable)
+    const tdPay = document.createElement('td');
+    const paySelect = document.createElement('select');
+    paySelect.className = 'form-select status-select';
+    paySelect.appendChild( new Option('Pending','Pending') );
+    paySelect.appendChild( new Option('Paid','Paid') );
+    paySelect.value = payStatus;
+    paySelect.addEventListener('change', (e) => {
+      const all = safeParse('orders', []);
+      // update the record
+      all[idx].paymentStatus = e.target.value;
+      // update status too
+      if(e.target.value === 'Paid') all[idx].status = 'Completed';
+      else all[idx].status = 'Pending';
+      safeSet('orders', all);
+
+      // Recompute pending list in storage not necessary: index computes from orders+customers.
+      // update UI immediately
+      updateOrdersUI();
+      // Also update global stats earnings/pending if needed
+      const stats = safeParse('stats', {customers:0, orders:0, earnings:0});
+      safeSet('stats', stats); // keep unchanged except if you want to adjust.
+      // Optionally notify other tabs via storage event by rewriting the key
+      localStorage.setItem('orders', JSON.stringify(all));
+    });
+    tdPay.appendChild(paySelect);
+
+    const tdStatus = document.createElement('td');
+    tdStatus.innerText = status;
+    tdStatus.className = (status === 'Pending') ? 'text-danger' : 'text-success';
+
+    tr.appendChild(tdName);
+    tr.appendChild(tdAmt);
+    tr.appendChild(tdPay);
+    tr.appendChild(tdStatus);
+    orderTable.appendChild(tr);
+  });
+
+  // update boxes
+  const stats = safeParse('stats', {customers:0, orders:0, earnings:0});
+  orderCountBox.innerText = Number(stats.orders || 0);
+  earningsBox.innerText = '₹' + Number(stats.earnings || 0);
+}
+
+/* ---------- Add order ---------- */
+function addOrder(){
+  const id = dropdown.value;
+  if(!id){ alert('Select product'); return; }
+
+  const inv = safeParse('inventory', defaultInventory);
+  const item = inv.find(x => x.id === id);
+  if(!item) { alert('Item missing'); return; }
+  if(item.qty <= 0){ alert('Out of stock: ' + item.name); return; }
+
+  // reduce stock & persist
+  item.qty -= 1;
+  safeSet('inventory', inv);
+
+  // create order record
+  const price = Number(prices[id] || 0);
+  const paymentStatus = paymentStatusSelect.value || 'Pending';
+  const status = (paymentStatus === 'Paid') ? 'Completed' : 'Pending';
+
+  const orderRec = {
+    item: item.name,
+    amount: price,
+    paymentStatus: paymentStatus,
+    status: status,
+    ts: Date.now()
+  };
+
+  const orders = safeParse('orders', []);
+  orders.push(orderRec);
+  safeSet('orders', orders);
+
+  // update stats (orders & earnings)
+  const stats = safeParse('stats', {customers:0, orders:0, earnings:0});
+  stats.orders = Number(stats.orders || 0) + 1;
+  stats.earnings = Number(stats.earnings || 0) + price;
+  safeSet('stats', stats);
+
+  // refresh UI
+  populateDropdown();
+  updateOrdersUI();
+  updateStockSnapshot();
+
+  // write again to trigger storage event for other tabs
+  localStorage.setItem('orders', JSON.stringify(orders));
+  localStorage.setItem('stats', JSON.stringify(stats));
+
+  alert('Order added: ' + item.name + ' — ₹' + price + ' — ' + paymentStatus);
+}
+
+/* ---------- init ---------- */
+populateDropdown();
+updateOrdersUI();
+updateStockSnapshot();
+
+/* ---------- wire add button ---------- */
+addBtn.addEventListener('click', addOrder);
+
+/* ---------- load sidebar ---------- */
+fetch('components/sidebar.html')
+  .then(r => r.text())
+  .then(html => document.getElementById('sidebar-container').innerHTML = html)
+  .catch(()=>{ document.getElementById('sidebar-container').innerHTML = ''; });
+
+/* optional: listen to storage events to refresh UI when other tab updates orders */
+window.addEventListener('storage', (e)=> {
+  if(e.key === 'orders' || e.key === 'inventory' || e.key === 'stats'){
+    populateDropdown();
+    updateOrdersUI();
+    updateStockSnapshot();
+  }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reminders — HisabKitab</title>
+  <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/css/dashboard.css" rel="stylesheet">
+</head>
+
+<body>
+
+<!-- Sidebar -->
+<div id="sidebar-container"></div>
+
+<div class="main-content" style="margin-top:80px">
+
+  <h3 class="mb-3">📩 Send Payment Reminders</h3>
+  <p>Click a customer to send WhatsApp reminder</p>
+
+  <div id="reminderCustomers"></div>
+
+</div>
+
+<script src="assets/js/reminders.js"></script>
+<script src="assets/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/dashboard.js"></script>
+
+<script>
+console.log("Reminders page loaded ✅");
+
+/* Load customer list from saved orders & payments */
+const rDiv = document.getElementById("reminderCustomers");
+
+/* Collect unique customers from orders */
+const orderCustomers = JSON.parse(localStorage.getItem("orders") || "[]").map(o=>o.customer);
+const payCustomers = JSON.parse(localStorage.getItem("payments") || "[]").map(p=>p.customer);
+const unique = [...new Set([...orderCustomers, ...payCustomers])];
+
+if(unique.length === 0){
+  rDiv.innerHTML = `<div class="alert alert-info">No customers found yet!</div>`;
+}
+
+unique.forEach(c=>{
+  rDiv.innerHTML += `
+    <button class="btn btn-warning w-100 mb-2" onclick="sendReminder('${c}')">
+      📤 Remind ${c} on WhatsApp
+    </button>`;
+});
+
+/* Simulated reminder function (actual WhatsApp API later) */
+function sendReminder(customer){
+  alert("📤 Reminder triggered for " + customer + " ✅\n(Connect backend API here later)");
+}
+</script>
+
+<script>
+/* Load sidebar */
+fetch("components/sidebar.html").then(r=>r.text()).then(t=>document.getElementById("sidebar-container").innerHTML = t);
+</script>
+
+</body>
+</html>
