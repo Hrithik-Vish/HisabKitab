@@ -1,18 +1,22 @@
 const express = require("express");
-const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
 
 const app = express();
-app.use(cors({ origin: "http://localhost:5173" }));
+
+// Middleware
+app.use(cors({ origin: "http://localhost:5173" })); 
 app.use(express.json());
 
-// routes will go here once Hrithik writes them
-// app.use("/api/auth", require("./routes/auth"));
+// Core CRUD Routes
+app.use("/api/auth", require("./routes/auth"));
+app.use("/api/orders", require("./routes/orders"));
+app.use("/api/inventory", require("./routes/inventory"));
+app.use("/api/customers", require("./routes/customers"));
+app.use("/api/payments", require("./routes/payments"));
 
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB connected"))
-  .catch((err) => console.log(err));
+// Health check endpoint
+app.get("/", (req, res) => res.send("HisabKitab server running with Supabase ✅"));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
