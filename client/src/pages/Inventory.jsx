@@ -43,16 +43,12 @@ function Inventory() {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
 
-  // SAVE TO LOCAL STORAGE
-
   useEffect(() => {
     localStorage.setItem(
       "inventory",
       JSON.stringify(items)
     );
   }, [items]);
-
-  // ADD ITEM
 
   const addItem = () => {
     if (
@@ -81,8 +77,6 @@ function Inventory() {
     setUnit("");
   };
 
-  // DELETE ITEM
-
   const deleteItem = (id) => {
     const updatedItems = items.filter(
       (item) => item.id !== id
@@ -90,8 +84,6 @@ function Inventory() {
 
     setItems(updatedItems);
   };
-
-  // AI RESTOCK SUGGESTIONS
 
   const getRestockSuggestions = async () => {
     setAiLoading(true);
@@ -123,316 +115,229 @@ function Inventory() {
     }
   };
 
+  const lowStockItems = items.filter(
+    (item) => item.quantity <= item.threshold
+  );
+
   return (
-    <div style={{ display: "flex" }}>
+    <div className="app-shell">
       <Sidebar />
 
-      <div
-        style={{
-          marginLeft: "250px",
-          width: "100%",
-          padding: "30px",
-          color: "white",
-        }}
-      >
-        <h1
-          style={{
-            textAlign: "center",
-            fontSize: "64px",
-            marginBottom: "30px",
-          }}
-        >
-          Inventory
-        </h1>
+      <main className="page">
+        <header className="page-header">
+          <div>
+            <p className="eyebrow">Stock control</p>
+            <h1 className="page-title">Inventory</h1>
+            <p className="page-subtitle">
+              Track stock health and ask Gemini for practical
+              restock suggestions before you run out.
+            </p>
+          </div>
 
-        {/* ADD INVENTORY FORM */}
+          <div className="hero-metric">
+            <span>Low stock items</span>
+            <strong>{lowStockItems.length}</strong>
+          </div>
+        </header>
 
-        <div
-          style={{
-            display: "flex",
-            gap: "10px",
-            flexWrap: "wrap",
-            marginBottom: "40px",
-          }}
-        >
+        <section className="panel form-panel">
           <input
+            className="input"
             type="text"
-            placeholder="Item Name"
+            placeholder="Item name"
             value={itemName}
             onChange={(e) =>
               setItemName(e.target.value)
             }
-            style={{
-              padding: "12px",
-              borderRadius: "8px",
-              border: "none",
-              width: "180px",
-            }}
           />
 
           <input
+            className="input"
             type="number"
             placeholder="Quantity"
             value={quantity}
             onChange={(e) =>
               setQuantity(e.target.value)
             }
-            style={{
-              padding: "12px",
-              borderRadius: "8px",
-              border: "none",
-              width: "140px",
-            }}
           />
 
           <input
+            className="input"
             type="number"
             placeholder="Threshold"
             value={threshold}
             onChange={(e) =>
               setThreshold(e.target.value)
             }
-            style={{
-              padding: "12px",
-              borderRadius: "8px",
-              border: "none",
-              width: "140px",
-            }}
           />
 
           <input
+            className="input"
             type="text"
             placeholder="Unit"
             value={unit}
             onChange={(e) => setUnit(e.target.value)}
-            style={{
-              padding: "12px",
-              borderRadius: "8px",
-              border: "none",
-              width: "120px",
-            }}
           />
 
           <button
             onClick={addItem}
-            style={{
-              padding: "12px 20px",
-              backgroundColor: "#333",
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
-              cursor: "pointer",
-              fontWeight: "bold",
-            }}
+            className="btn btn-primary"
           >
             Add Item
           </button>
-        </div>
+        </section>
 
-        {/* INVENTORY LIST */}
+        <section className="grid content-grid">
+          <div className="cards-list">
+            {items.map((item) => {
+              const lowStock =
+                item.quantity <= item.threshold;
+              const stockRatio =
+                item.threshold === 0
+                  ? 100
+                  : Math.min(
+                      100,
+                      Math.round(
+                        (item.quantity / item.threshold) *
+                          100
+                      )
+                    );
 
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "20px",
-          }}
-        >
-          {items.map((item) => {
-            const lowStock =
-              item.quantity <= item.threshold;
-
-            return (
-              <div
-                key={item.id}
-                style={{
-                  backgroundColor: "#161b22",
-                  border: lowStock
-                    ? "2px solid red"
-                    : "1px solid #30363d",
-                  padding: "25px",
-                  borderRadius: "12px",
-                }}
-              >
-                <h2>{item.itemName}</h2>
-
-                <p>
-                  Quantity: {item.quantity}{" "}
-                  {item.unit}
-                </p>
-
-                <p>
-                  Threshold: {item.threshold}{" "}
-                  {item.unit}
-                </p>
-
-                <p
-                  style={{
-                    color: lowStock
-                      ? "#ff4d4d"
-                      : "lightgreen",
-                    fontWeight: "bold",
-                  }}
+              return (
+                <article
+                  key={item.id}
+                  className="card"
                 >
-                  {lowStock
-                    ? "Low Stock Alert"
-                    : "Stock Healthy"}
-                </p>
+                  <div className="card-head">
+                    <div>
+                      <h2>{item.itemName}</h2>
+                      <p className="muted">
+                        Threshold: {item.threshold}{" "}
+                        {item.unit}
+                      </p>
+                    </div>
 
-                <button
-                  onClick={() =>
-                    deleteItem(item.id)
-                  }
-                  style={{
-                    marginTop: "15px",
-                    padding: "10px 18px",
-                    backgroundColor: "crimson",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                    fontWeight: "bold",
-                  }}
-                >
-                  Delete Item
-                </button>
+                    <span
+                      className={
+                        lowStock
+                          ? "pill pill-low"
+                          : "pill pill-healthy"
+                      }
+                    >
+                      {lowStock
+                        ? "Low Stock"
+                        : "Healthy"}
+                    </span>
+                  </div>
+
+                  <p className="amount">
+                    {item.quantity} {item.unit}
+                  </p>
+
+                  <div
+                    className="progress-track"
+                    style={{ marginTop: "14px" }}
+                  >
+                    <div
+                      className="progress-fill"
+                      style={{
+                        width: `${stockRatio}%`,
+                        background: lowStock
+                          ? "#f5c84c"
+                          : undefined,
+                      }}
+                    />
+                  </div>
+
+                  <div
+                    className="actions"
+                    style={{ marginTop: "18px" }}
+                  >
+                    <button
+                      onClick={() =>
+                        deleteItem(item.id)
+                      }
+                      className="btn btn-danger"
+                    >
+                      Delete Item
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+
+          <aside className="panel ai-card">
+            <div className="card-head">
+              <div>
+                <p className="eyebrow">Gemini AI</p>
+                <h2 style={{ marginTop: "8px" }}>
+                  Restock Suggestions
+                </h2>
+                <p className="muted">
+                  Uses the backend /api/ai/restock route.
+                </p>
               </div>
-            );
-          })}
-        </div>
-
-        {/* AI INVENTORY INSIGHTS */}
-
-        <div
-          style={{
-            marginTop: "50px",
-            backgroundColor: "#161b22",
-            border: "1px solid #30363d",
-            borderRadius: "12px",
-            padding: "25px",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              gap: "15px",
-              alignItems: "center",
-              flexWrap: "wrap",
-              marginBottom: "20px",
-            }}
-          >
-            <h2
-              style={{
-                color: "#58a6ff",
-              }}
-            >
-              AI Restock Suggestions
-            </h2>
+            </div>
 
             <button
               onClick={getRestockSuggestions}
               disabled={aiLoading || items.length === 0}
-              style={{
-                padding: "10px 18px",
-                backgroundColor:
-                  aiLoading || items.length === 0
-                    ? "#30363d"
-                    : "#238636",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                cursor:
-                  aiLoading || items.length === 0
-                    ? "not-allowed"
-                    : "pointer",
-                fontWeight: "bold",
-              }}
+              className="btn btn-primary"
+              style={{ width: "100%" }}
             >
               {aiLoading
                 ? "Asking AI..."
                 : "Get AI Suggestions"}
             </button>
-          </div>
 
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "15px",
-            }}
-          >
-            {aiError && (
-              <div
-                style={{
-                  backgroundColor: "#2d1117",
-                  color: "#ffb3b3",
-                  padding: "15px",
-                  borderRadius: "10px",
-                  border: "1px solid #8b2635",
-                }}
-              >
-                {aiError}
-              </div>
-            )}
-
-            {!aiError &&
-              restockSuggestions.length === 0 && (
-                <div
-                  style={{
-                    backgroundColor: "#0d1117",
-                    padding: "15px",
-                    borderRadius: "10px",
-                    border: "1px solid #30363d",
-                  }}
-                >
-                  Click the button to ask Gemini for
-                  restock advice based on your current
-                  inventory.
+            <div
+              className="grid"
+              style={{ marginTop: "16px" }}
+            >
+              {aiError && (
+                <div className="error-state">
+                  {aiError}
                 </div>
               )}
 
-            {restockSuggestions.map(
-              (suggestion, index) => (
-                <div
-                  key={`${suggestion.item}-${index}`}
-                  style={{
-                    backgroundColor: "#0d1117",
-                    padding: "15px",
-                    borderRadius: "10px",
-                    border: "1px solid #30363d",
-                  }}
-                >
-                  <strong>
-                    {suggestion.item ||
-                      "Inventory item"}
-                  </strong>
+              {!aiError &&
+                restockSuggestions.length === 0 && (
+                  <div className="empty-state">
+                    Click the button to generate specific restock
+                    quantities and reasons from Gemini.
+                  </div>
+                )}
 
-                  <p style={{ marginTop: "8px" }}>
-                    Current quantity:{" "}
-                    {suggestion.currentQty ?? "N/A"}
-                  </p>
-
-                  <p>
-                    Suggested restock:{" "}
-                    {suggestion.suggestedRestock ??
-                      "N/A"}
-                  </p>
-
-                  <p
-                    style={{
-                      color: "#c9d1d9",
-                      marginTop: "8px",
-                    }}
+              {restockSuggestions.map(
+                (suggestion, index) => (
+                  <div
+                    key={`${suggestion.item}-${index}`}
+                    className="suggestion-card"
                   >
-                    {suggestion.reason}
-                  </p>
-                </div>
-              )
-            )}
-          </div>
-        </div>
-      </div>
+                    <strong>
+                      {suggestion.item ||
+                        "Inventory item"}
+                    </strong>
+                    <span className="muted">
+                      Current:{" "}
+                      {suggestion.currentQty ?? "N/A"}
+                    </span>
+                    <span>
+                      Restock:{" "}
+                      {suggestion.suggestedRestock ??
+                        "N/A"}
+                    </span>
+                    <p className="muted">
+                      {suggestion.reason}
+                    </p>
+                  </div>
+                )
+              )}
+            </div>
+          </aside>
+        </section>
+      </main>
     </div>
   );
 }

@@ -34,16 +34,12 @@ function Orders() {
   const [customer, setCustomer] = useState("");
   const [amount, setAmount] = useState("");
 
-  // SAVE TO LOCAL STORAGE
-
   useEffect(() => {
     localStorage.setItem(
       "orders",
       JSON.stringify(orders)
     );
   }, [orders]);
-
-  // ADD ORDER
 
   const addOrder = () => {
     if (!customer || !amount) {
@@ -64,8 +60,6 @@ function Orders() {
     setAmount("");
   };
 
-  // MARK AS PAID
-
   const markAsPaid = (id) => {
     const updatedOrders = orders.map((order) => {
       if (order.id === id) {
@@ -81,8 +75,6 @@ function Orders() {
     setOrders(updatedOrders);
   };
 
-  // DELETE ORDER
-
   const deleteOrder = (id) => {
     const filteredOrders = orders.filter(
       (order) => order.id !== id
@@ -91,143 +83,91 @@ function Orders() {
     setOrders(filteredOrders);
   };
 
+  const pendingTotal = orders
+    .filter((order) => order.status !== "Paid")
+    .reduce((total, order) => total + order.amount, 0);
+
   return (
-    <div style={{ display: "flex" }}>
+    <div className="app-shell">
       <Sidebar />
 
-      <div
-        style={{
-          marginLeft: "250px",
-          width: "100%",
-          padding: "30px",
-          color: "white",
-        }}
-      >
-        <h1
-          style={{
-            textAlign: "center",
-            fontSize: "64px",
-            marginBottom: "20px",
-          }}
-        >
-          Orders
-        </h1>
+      <main className="page">
+        <header className="page-header">
+          <div>
+            <p className="eyebrow">Sales tracker</p>
+            <h1 className="page-title">Orders</h1>
+            <p className="page-subtitle">
+              Add customer orders, settle payments and keep the
+              pending amount visible for quick action.
+            </p>
+          </div>
 
-        <div
-          style={{
-            marginTop: "30px",
-            marginBottom: "30px",
-            display: "flex",
-            gap: "10px",
-            alignItems: "center",
-            flexWrap: "wrap",
-          }}
-        >
+          <div className="hero-metric">
+            <span>Pending collection</span>
+            <strong>Rs.{pendingTotal}</strong>
+          </div>
+        </header>
+
+        <section className="panel form-panel">
           <input
+            className="input"
             type="text"
-            placeholder="Customer Name"
+            placeholder="Customer name"
             value={customer}
             onChange={(e) => setCustomer(e.target.value)}
-            style={{
-              padding: "12px",
-              width: "220px",
-              borderRadius: "8px",
-              border: "none",
-              outline: "none",
-            }}
           />
 
           <input
+            className="input"
             type="number"
             placeholder="Amount"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            style={{
-              padding: "12px",
-              width: "150px",
-              borderRadius: "8px",
-              border: "none",
-              outline: "none",
-            }}
           />
 
           <button
             onClick={addOrder}
-            style={{
-              padding: "12px 20px",
-              backgroundColor: "#333",
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
-              cursor: "pointer",
-              fontWeight: "bold",
-            }}
+            className="btn btn-primary"
           >
             Add Order
           </button>
-        </div>
+        </section>
 
-        <div
-          style={{
-            marginTop: "30px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "20px",
-          }}
-        >
+        <section className="cards-list">
           {orders.map((order) => (
-            <div
+            <article
               key={order.id}
-              style={{
-                backgroundColor: "#161b22",
-                border: "1px solid #30363d",
-                padding: "25px",
-                borderRadius: "12px",
-              }}
+              className="card"
             >
-              <h2>{order.customer}</h2>
+              <div className="card-head">
+                <div>
+                  <h2>{order.customer}</h2>
+                  <p className="muted">Order #{order.id}</p>
+                </div>
 
-              <p
-                style={{
-                  fontSize: "18px",
-                }}
-              >
-                Amount: ₹{order.amount}
-              </p>
-
-              <p
-                style={{
-                  fontSize: "18px",
-                  color:
+                <span
+                  className={
                     order.status === "Paid"
-                      ? "lightgreen"
-                      : "#ffcc00",
-                }}
-              >
-                Status: {order.status}
-              </p>
+                      ? "pill pill-paid"
+                      : "pill pill-pending"
+                  }
+                >
+                  {order.status}
+                </span>
+              </div>
+
+              <p className="amount">Rs.{order.amount}</p>
 
               <div
-                style={{
-                  display: "flex",
-                  gap: "10px",
-                  marginTop: "15px",
-                }}
+                className="actions"
+                style={{ marginTop: "18px" }}
               >
                 {order.status !== "Paid" && (
                   <button
                     onClick={() =>
                       markAsPaid(order.id)
                     }
-                    style={{
-                      padding: "10px 18px",
-                      backgroundColor: "green",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "8px",
-                      cursor: "pointer",
-                      fontWeight: "bold",
-                    }}
+                    className="btn btn-green"
                   >
                     Mark as Paid
                   </button>
@@ -237,23 +177,15 @@ function Orders() {
                   onClick={() =>
                     deleteOrder(order.id)
                   }
-                  style={{
-                    padding: "10px 18px",
-                    backgroundColor: "crimson",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                    fontWeight: "bold",
-                  }}
+                  className="btn btn-danger"
                 >
                   Delete
                 </button>
               </div>
-            </div>
+            </article>
           ))}
-        </div>
-      </div>
+        </section>
+      </main>
     </div>
   );
 }

@@ -19,11 +19,6 @@ function Login() {
         }
       );
 
-      console.log(
-        "Backend response:",
-        response.data
-      );
-
       localStorage.setItem(
         "token",
         response.data.token
@@ -46,132 +41,70 @@ function Login() {
   };
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        background:
-          "linear-gradient(to right, #0d1117, #161b22)",
-        color: "white",
-      }}
-    >
-      <div
-        style={{
-          backgroundColor: "#161b22",
-          border: "1px solid #30363d",
-          padding: "40px",
-          borderRadius: "16px",
-          width: "400px",
-          textAlign: "center",
-          boxShadow: "0 0 25px rgba(0,0,0,0.4)",
-        }}
-      >
-        {/* LOGO */}
+    <main className="auth-page">
+      <section className="login-shell">
+        <div className="login-story">
+          <div className="brand-row">
+            <img
+              src={logo}
+              alt="HisabKitab Logo"
+              className="brand-logo"
+            />
+            <div className="brand-name">HisabKitab</div>
+          </div>
 
-        <img
-          src={logo}
-          alt="HisabKitab Logo"
-          style={{
-            width: "120px",
-            marginBottom: "20px",
-            borderRadius: "16px",
-          }}
-        />
+          <div className="login-copy">
+            <p className="eyebrow">AI business helper</p>
+            <h1>Run a cleaner shop from one simple screen.</h1>
+            <p>
+              Track orders, stock, customer dues and AI suggestions
+              built for fast-moving Indian micro-businesses.
+            </p>
+          </div>
+        </div>
 
-        <h1
-          style={{
-            marginBottom: "10px",
-            color: "#58a6ff",
-          }}
-        >
-          HisabKitab
-        </h1>
+        <div className="login-card">
+          <div>
+            <p className="eyebrow">Welcome back</p>
+            <h2>Sign in to your ledger</h2>
+            <p>
+              Your dashboard is ready with live business actions.
+            </p>
+          </div>
 
-        <p
-          style={{
-            color: "#aaa",
-            marginBottom: "30px",
-          }}
-        >
-          AI-Powered Business Helper
-        </p>
+          <input
+            className="input"
+            type="email"
+            placeholder="Enter email"
+            value={email}
+            onChange={(e) =>
+              setEmail(e.target.value)
+            }
+          />
 
-        {/* EMAIL */}
+          <input
+            className="input"
+            type="password"
+            placeholder="Enter password"
+            value={password}
+            onChange={(e) =>
+              setPassword(e.target.value)
+            }
+          />
 
-        <input
-          type="email"
-          placeholder="Enter Email"
-          value={email}
-          onChange={(e) =>
-            setEmail(e.target.value)
-          }
-          style={{
-            width: "100%",
-            padding: "14px",
-            marginBottom: "20px",
-            borderRadius: "10px",
-            border: "1px solid #30363d",
-            backgroundColor: "#0d1117",
-            color: "white",
-            fontSize: "16px",
-          }}
-        />
+          <button
+            onClick={handleLogin}
+            className="btn btn-primary"
+          >
+            Login
+          </button>
 
-        {/* PASSWORD */}
-
-        <input
-          type="password"
-          placeholder="Enter Password"
-          value={password}
-          onChange={(e) =>
-            setPassword(e.target.value)
-          }
-          style={{
-            width: "100%",
-            padding: "14px",
-            marginBottom: "25px",
-            borderRadius: "10px",
-            border: "1px solid #30363d",
-            backgroundColor: "#0d1117",
-            color: "white",
-            fontSize: "16px",
-          }}
-        />
-
-        {/* LOGIN BUTTON */}
-
-        <button
-          onClick={handleLogin}
-          style={{
-            width: "100%",
-            padding: "14px",
-            backgroundColor: "#238636",
-            color: "white",
-            border: "none",
-            borderRadius: "10px",
-            cursor: "pointer",
-            fontWeight: "bold",
-            fontSize: "16px",
-          }}
-        >
-          Login
-        </button>
-
-        {/* DEMO TEXT */}
-
-        <p
-          style={{
-            marginTop: "20px",
-            color: "#888",
-            fontSize: "14px",
-          }}
-        >
-          Built for HackArena 🚀
-        </p>
-      </div>
-    </div>
+          <p className="muted">
+            Built for a fast demo: simple, practical and AI-assisted.
+          </p>
+        </div>
+      </section>
+    </main>
   );
 }
 

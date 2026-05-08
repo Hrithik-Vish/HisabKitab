@@ -1,5 +1,12 @@
-import { Link, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
+
+const links = [
+  { to: "/dashboard", label: "Dashboard", icon: "D" },
+  { to: "/orders", label: "Orders", icon: "O" },
+  { to: "/inventory", label: "Inventory", icon: "I" },
+  { to: "/customers", label: "Customers", icon: "C" },
+];
 
 function Sidebar() {
   const navigate = useNavigate();
@@ -12,120 +19,45 @@ function Sidebar() {
   };
 
   return (
-    <div
-      style={{
-        width: "250px",
-        height: "100vh",
-        backgroundColor: "#161b22",
-        borderRight: "1px solid #30363d",
-        color: "white",
-        padding: "30px 20px",
-        position: "fixed",
-        left: 0,
-        top: 0,
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      {/* LOGO + TITLE */}
+    <aside className="sidebar">
+      <div className="sidebar-brand">
+        <img src={logo} alt="HisabKitab Logo" />
 
-      <div
-        style={{
-          marginBottom: "50px",
-          textAlign: "center",
-        }}
-      >
-        <img
-          src={logo}
-          alt="HisabKitab Logo"
-          style={{
-            width: "120px",
-            borderRadius: "12px",
-            marginBottom: "15px",
-          }}
-        />
-
-        <h1
-          style={{
-            color: "#58a6ff",
-            fontSize: "36px",
-            fontWeight: "bold",
-          }}
-        >
-          HisabKitab
-        </h1>
+        <div>
+          <div className="sidebar-title">HisabKitab</div>
+          <div className="sidebar-subtitle">Smart ledger</div>
+        </div>
       </div>
 
-      {/* NAVIGATION LINKS */}
+      <nav className="nav-list">
+        {links.map((link) => (
+          <NavLink
+            key={link.to}
+            to={link.to}
+            className={({ isActive }) =>
+              isActive ? "nav-link active" : "nav-link"
+            }
+          >
+            <span className="nav-icon">{link.icon}</span>
+            {link.label}
+          </NavLink>
+        ))}
+      </nav>
 
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "25px",
-          fontSize: "20px",
-        }}
-      >
-        <Link
-          to="/dashboard"
-          style={{
-            color: "white",
-            textDecoration: "none",
-          }}
-        >
-          Dashboard
-        </Link>
+      <div className="sidebar-footer">
+        <div className="mini-panel">
+          <strong>Demo ready</strong>
+          <span>Orders, stock, reminders and Gemini insights.</span>
+        </div>
 
-        <Link
-          to="/orders"
-          style={{
-            color: "white",
-            textDecoration: "none",
-          }}
+        <button
+          onClick={handleLogout}
+          className="btn btn-danger"
         >
-          Orders
-        </Link>
-
-        <Link
-          to="/inventory"
-          style={{
-            color: "white",
-            textDecoration: "none",
-          }}
-        >
-          Inventory
-        </Link>
-
-        <Link
-          to="/customers"
-          style={{
-            color: "white",
-            textDecoration: "none",
-          }}
-        >
-          Customers
-        </Link>
+          Logout
+        </button>
       </div>
-
-      {/* LOGOUT BUTTON */}
-
-      <button
-        onClick={handleLogout}
-        style={{
-          marginTop: "auto",
-          padding: "14px",
-          backgroundColor: "crimson",
-          color: "white",
-          border: "none",
-          borderRadius: "10px",
-          cursor: "pointer",
-          fontWeight: "bold",
-          fontSize: "16px",
-        }}
-      >
-        Logout
-      </button>
-    </div>
+    </aside>
   );
 }
 

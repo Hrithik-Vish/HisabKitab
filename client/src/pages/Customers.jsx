@@ -36,16 +36,12 @@ function Customers() {
   const [phone, setPhone] = useState("");
   const [due, setDue] = useState("");
 
-  // SAVE TO LOCAL STORAGE
-
   useEffect(() => {
     localStorage.setItem(
       "customers",
       JSON.stringify(customers)
     );
   }, [customers]);
-
-  // ADD CUSTOMER
 
   const addCustomer = () => {
     if (!name || !phone || !due) {
@@ -67,8 +63,6 @@ function Customers() {
     setDue("");
   };
 
-  // DELETE CUSTOMER
-
   const deleteCustomer = (id) => {
     const updatedCustomers = customers.filter(
       (customer) => customer.id !== id
@@ -76,8 +70,6 @@ function Customers() {
 
     setCustomers(updatedCustomers);
   };
-
-  // SEND REMINDER
 
   const sendReminder = (customer) => {
     const digitsOnly = String(customer.phone || "").replace(/\D/g, "");
@@ -92,7 +84,7 @@ function Customers() {
     const message = `
 Hello ${customer.name},
 
-This is a friendly reminder that your pending payment of ₹${customer.totalDue} is due.
+This is a friendly reminder that your pending payment of Rs.${customer.totalDue} is due.
 
 Please clear the payment at your earliest convenience.
 
@@ -108,152 +100,108 @@ Thank you for choosing HisabKitab.
     window.open(whatsappUrl, "_blank", "noopener,noreferrer");
   };
 
+  const totalDue = customers.reduce(
+    (total, customer) => total + customer.totalDue,
+    0
+  );
+
   return (
-    <div style={{ display: "flex" }}>
+    <div className="app-shell">
       <Sidebar />
 
-      <div
-        style={{
-          marginLeft: "250px",
-          width: "100%",
-          padding: "30px",
-          color: "white",
-        }}
-      >
-        <h1
-          style={{
-            textAlign: "center",
-            fontSize: "64px",
-            marginBottom: "30px",
-          }}
-        >
-          Customers
-        </h1>
+      <main className="page">
+        <header className="page-header">
+          <div>
+            <p className="eyebrow">Customer dues</p>
+            <h1 className="page-title">Customers</h1>
+            <p className="page-subtitle">
+              Store customer numbers, track pending payments and
+              launch WhatsApp reminders in one click.
+            </p>
+          </div>
 
-        {/* ADD CUSTOMER FORM */}
+          <div className="hero-metric">
+            <span>Total customer due</span>
+            <strong>Rs.{totalDue}</strong>
+          </div>
+        </header>
 
-        <div
-          style={{
-            display: "flex",
-            gap: "10px",
-            flexWrap: "wrap",
-            marginBottom: "40px",
-          }}
-        >
+        <section className="panel form-panel">
           <input
+            className="input"
             type="text"
-            placeholder="Customer Name"
+            placeholder="Customer name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            style={{
-              padding: "12px",
-              borderRadius: "8px",
-              border: "none",
-              width: "200px",
-            }}
           />
 
           <input
+            className="input"
             type="text"
-            placeholder="Phone Number"
+            placeholder="Phone number"
             value={phone}
             onChange={(e) =>
               setPhone(e.target.value)
             }
-            style={{
-              padding: "12px",
-              borderRadius: "8px",
-              border: "none",
-              width: "200px",
-            }}
           />
 
           <input
+            className="input"
             type="number"
-            placeholder="Pending Due"
+            placeholder="Pending due"
             value={due}
             onChange={(e) => setDue(e.target.value)}
-            style={{
-              padding: "12px",
-              borderRadius: "8px",
-              border: "none",
-              width: "180px",
-            }}
           />
 
           <button
             onClick={addCustomer}
-            style={{
-              padding: "12px 20px",
-              backgroundColor: "#333",
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
-              cursor: "pointer",
-              fontWeight: "bold",
-            }}
+            className="btn btn-primary"
           >
             Add Customer
           </button>
-        </div>
+        </section>
 
-        {/* CUSTOMER LIST */}
-
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "20px",
-          }}
-        >
+        <section className="cards-list">
           {customers.map((customer) => (
-            <div
+            <article
               key={customer.id}
-              style={{
-                backgroundColor: "#161b22",
-                border: "1px solid #30363d",
-                padding: "25px",
-                borderRadius: "12px",
-              }}
+              className="card"
             >
-              <h2>{customer.name}</h2>
+              <div className="card-head">
+                <div>
+                  <h2>{customer.name}</h2>
+                  <p className="muted">
+                    Phone: {customer.phone}
+                  </p>
+                </div>
 
-              <p>Phone: {customer.phone}</p>
-
-              <p
-                style={{
-                  color:
+                <span
+                  className={
                     customer.totalDue > 0
-                      ? "#ffcc00"
-                      : "lightgreen",
-                  fontWeight: "bold",
-                }}
-              >
-                Pending Due: ₹{customer.totalDue}
+                      ? "pill pill-pending"
+                      : "pill pill-paid"
+                  }
+                >
+                  {customer.totalDue > 0
+                    ? "Due"
+                    : "Clear"}
+                </span>
+              </div>
+
+              <p className="amount">
+                Rs.{customer.totalDue}
               </p>
 
               <div
-                style={{
-                  display: "flex",
-                  gap: "10px",
-                  marginTop: "15px",
-                  flexWrap: "wrap",
-                }}
+                className="actions"
+                style={{ marginTop: "18px" }}
               >
                 {customer.totalDue > 0 && (
                   <button
                     onClick={() =>
                       sendReminder(customer)
                     }
-                    style={{
-                      padding: "10px 18px",
-                      backgroundColor: "#25D366",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "8px",
-                      cursor: "pointer",
-                      fontWeight: "bold",
-                    }}
+                    className="btn btn-whatsapp"
                   >
                     Send WhatsApp Reminder
                   </button>
@@ -263,23 +211,15 @@ Thank you for choosing HisabKitab.
                   onClick={() =>
                     deleteCustomer(customer.id)
                   }
-                  style={{
-                    padding: "10px 18px",
-                    backgroundColor: "crimson",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                    fontWeight: "bold",
-                  }}
+                  className="btn btn-danger"
                 >
                   Delete Customer
                 </button>
               </div>
-            </div>
+            </article>
           ))}
-        </div>
-      </div>
+        </section>
+      </main>
     </div>
   );
 }
