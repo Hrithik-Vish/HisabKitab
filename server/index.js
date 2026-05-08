@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
-require("dotenv").config();
+const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 const app = express();
 
@@ -16,8 +17,8 @@ app.use("/api/customers", require("./routes/customers"));
 app.use("/api/payments", require("./routes/payments"));
 
 // AI & WhatsApp Routes (Member 3 - Shreyas)
-// app.use("/api/ai", require("./routes/ai"));
-// app.use("/api/whatsapp", require("./routes/whatsapp"));
+app.use("/api/ai", require("./routes/ai"));
+app.use("/api/whatsapp", require("./routes/whatsapp"));
 
 // Health check endpoint
 app.get("/", (req, res) => res.send("HisabKitab server running with Supabase ✅"));
