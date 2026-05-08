@@ -1,3 +1,5 @@
-/server/node_modules
-/server/.env
-.env
+# /server/node_modules
+# .env
+# echo ".env" >> .gitignore
+# echo "node_modules/" >> .gitignore
+# echo "server/.env" >> .gitignore
