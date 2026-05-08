@@ -4,6 +4,7 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 require("dotenv").config();
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const modelName = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 
 // POST /api/ai/insight
 // sends fake order data to Gemini and returns 2 business tips
@@ -24,7 +25,7 @@ router.post("/insight", async (req, res) => {
       Return only JSON, no extra text.
     `;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: modelName });
     const result = await model.generateContent(prompt);
     const text = result.response.text();
 
@@ -55,7 +56,7 @@ router.post("/restock", async (req, res) => {
       Return only JSON, no extra text.
     `;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: modelName });
     const result = await model.generateContent(prompt);
     const text = result.response.text();
 

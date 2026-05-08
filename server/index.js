@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
-require("dotenv").config();
+const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 const app = express();
 
@@ -9,14 +10,14 @@ app.use(cors({ origin: "http://localhost:5173" }));
 app.use(express.json());
 
 // Core CRUD Routes (Member 2 - Hrithik)
-app.use("/api/auth", require("./routes/auth"));
-app.use("/api/orders", require("./routes/orders"));
-app.use("/api/inventory", require("./routes/inventory"));
-app.use("/api/customers", require("./routes/customers"));
-app.use("/api/payments", require("./routes/payments"));
+// app.use("/api/auth", require("./routes/auth"));
+// app.use("/api/orders", require("./routes/orders"));
+// app.use("/api/inventory", require("./routes/inventory"));
+// app.use("/api/customers", require("./routes/customers"));
+// app.use("/api/payments", require("./routes/payments"));
 
 // AI & WhatsApp Routes (Member 3 - Shreyas)
-// app.use("/api/ai", require("./routes/ai"));
+app.use("/api/ai", require("./routes/ai"));
 // app.use("/api/whatsapp", require("./routes/whatsapp"));
 
 // Health check endpoint
