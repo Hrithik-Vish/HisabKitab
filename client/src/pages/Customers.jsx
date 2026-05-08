@@ -80,7 +80,16 @@ function Customers() {
   // SEND REMINDER
 
   const sendReminder = (customer) => {
-  const message = `
+    const digitsOnly = String(customer.phone || "").replace(/\D/g, "");
+    const whatsappNumber =
+      digitsOnly.length === 10 ? `91${digitsOnly}` : digitsOnly;
+
+    if (!whatsappNumber) {
+      alert("Please add a valid phone number for this customer.");
+      return;
+    }
+
+    const message = `
 Hello ${customer.name},
 
 This is a friendly reminder that your pending payment of ₹${customer.totalDue} is due.
@@ -92,8 +101,12 @@ Thank you for choosing HisabKitab.
 - HisabKitab AI
 `;
 
-  alert(message);
-};
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
+      message.trim()
+    )}`;
+
+    window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+  };
 
   return (
     <div style={{ display: "flex" }}>
