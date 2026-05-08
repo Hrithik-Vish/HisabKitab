@@ -18,7 +18,7 @@ app.use(express.json());
 
 // AI & WhatsApp Routes (Member 3 - Shreyas)
 app.use("/api/ai", require("./routes/ai"));
-// app.use("/api/whatsapp", require("./routes/whatsapp"));
+app.use("/api/whatsapp", require("./routes/whatsapp"));
 
 // Health check endpoint
 app.get("/", (req, res) => res.send("HisabKitab server running with Supabase ✅"));
