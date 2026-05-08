@@ -42,6 +42,8 @@ function Inventory() {
   const [restockSuggestions, setRestockSuggestions] = useState([]);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
+  const [search, setSearch] = useState("");
+  const [stockFilter, setStockFilter] = useState("All");
 
   useEffect(() => {
     localStorage.setItem(
@@ -119,6 +121,19 @@ function Inventory() {
     (item) => item.quantity <= item.threshold
   );
 
+  const filteredItems = items.filter((item) => {
+    const isLowStock = item.quantity <= item.threshold;
+    const matchesSearch = item.itemName
+      .toLowerCase()
+      .includes(search.toLowerCase());
+    const matchesStock =
+      stockFilter === "All" ||
+      (stockFilter === "Low" && isLowStock) ||
+      (stockFilter === "Healthy" && !isLowStock);
+
+    return matchesSearch && matchesStock;
+  });
+
   return (
     <div className="app-shell">
       <Sidebar />
@@ -187,9 +202,41 @@ function Inventory() {
           </button>
         </section>
 
+        <section className="toolbar">
+          <input
+            className="input"
+            type="text"
+            placeholder="Search inventory"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+
+          <div className="segmented">
+            {["All", "Low", "Healthy"].map((filter) => (
+              <button
+                key={filter}
+                className={
+                  stockFilter === filter
+                    ? "segment active"
+                    : "segment"
+                }
+                onClick={() => setStockFilter(filter)}
+              >
+                {filter}
+              </button>
+            ))}
+          </div>
+        </section>
+
         <section className="grid content-grid">
           <div className="cards-list">
-            {items.map((item) => {
+            {filteredItems.length === 0 && (
+              <div className="empty-state">
+                No inventory items match your search or filter.
+              </div>
+            )}
+
+            {filteredItems.map((item) => {
               const lowStock =
                 item.quantity <= item.threshold;
               const stockRatio =

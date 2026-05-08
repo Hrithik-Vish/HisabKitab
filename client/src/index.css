@@ -166,6 +166,31 @@ p {
   color: var(--muted);
 }
 
+.register-shell {
+  width: min(1080px, 100%);
+}
+
+.auth-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.auth-switch {
+  text-align: center;
+  font-size: 14px;
+}
+
+.auth-switch a {
+  color: var(--cyan);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.auth-switch a:hover {
+  text-decoration: underline;
+}
+
 .app-shell {
   min-height: 100vh;
 }
@@ -544,6 +569,39 @@ p {
   background: rgba(255, 255, 255, 0.045);
 }
 
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.segmented {
+  display: inline-flex;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.segment {
+  min-height: 36px;
+  padding: 0 13px;
+  border: 0;
+  border-radius: 6px;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.segment.active {
+  color: white;
+  background: rgba(79, 140, 255, 0.22);
+}
+
 .error-state {
   color: #ffb8c8;
   border-color: rgba(239, 71, 111, 0.38);
@@ -603,5 +661,9 @@ p {
   .form-panel .input,
   .form-panel .btn {
     width: 100%;
+  }
+
+  .auth-grid {
+    grid-template-columns: 1fr;
   }
 }

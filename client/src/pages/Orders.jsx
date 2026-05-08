@@ -33,6 +33,8 @@ function Orders() {
 
   const [customer, setCustomer] = useState("");
   const [amount, setAmount] = useState("");
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
 
   useEffect(() => {
     localStorage.setItem(
@@ -87,6 +89,16 @@ function Orders() {
     .filter((order) => order.status !== "Paid")
     .reduce((total, order) => total + order.amount, 0);
 
+  const filteredOrders = orders.filter((order) => {
+    const matchesSearch = order.customer
+      .toLowerCase()
+      .includes(search.toLowerCase());
+    const matchesStatus =
+      statusFilter === "All" || order.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  });
+
   return (
     <div className="app-shell">
       <Sidebar />
@@ -133,8 +145,40 @@ function Orders() {
           </button>
         </section>
 
+        <section className="toolbar">
+          <input
+            className="input"
+            type="text"
+            placeholder="Search orders"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+
+          <div className="segmented">
+            {["All", "Pending", "Paid"].map((status) => (
+              <button
+                key={status}
+                className={
+                  statusFilter === status
+                    ? "segment active"
+                    : "segment"
+                }
+                onClick={() => setStatusFilter(status)}
+              >
+                {status}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {filteredOrders.length === 0 && (
+          <div className="empty-state">
+            No orders match your search or filter.
+          </div>
+        )}
+
         <section className="cards-list">
-          {orders.map((order) => (
+          {filteredOrders.map((order) => (
             <article
               key={order.id}
               className="card"

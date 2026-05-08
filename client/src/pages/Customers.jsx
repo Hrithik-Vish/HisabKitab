@@ -35,6 +35,8 @@ function Customers() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [due, setDue] = useState("");
+  const [search, setSearch] = useState("");
+  const [dueFilter, setDueFilter] = useState("All");
 
   useEffect(() => {
     localStorage.setItem(
@@ -105,6 +107,20 @@ Thank you for choosing HisabKitab.
     0
   );
 
+  const filteredCustomers = customers.filter((customer) => {
+    const matchesSearch =
+      customer.name
+        .toLowerCase()
+        .includes(search.toLowerCase()) ||
+      customer.phone.includes(search);
+    const matchesDue =
+      dueFilter === "All" ||
+      (dueFilter === "Due" && customer.totalDue > 0) ||
+      (dueFilter === "Clear" && customer.totalDue === 0);
+
+    return matchesSearch && matchesDue;
+  });
+
   return (
     <div className="app-shell">
       <Sidebar />
@@ -161,8 +177,40 @@ Thank you for choosing HisabKitab.
           </button>
         </section>
 
+        <section className="toolbar">
+          <input
+            className="input"
+            type="text"
+            placeholder="Search customers"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+
+          <div className="segmented">
+            {["All", "Due", "Clear"].map((filter) => (
+              <button
+                key={filter}
+                className={
+                  dueFilter === filter
+                    ? "segment active"
+                    : "segment"
+                }
+                onClick={() => setDueFilter(filter)}
+              >
+                {filter}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {filteredCustomers.length === 0 && (
+          <div className="empty-state">
+            No customers match your search or filter.
+          </div>
+        )}
+
         <section className="cards-list">
-          {customers.map((customer) => (
+          {filteredCustomers.map((customer) => (
             <article
               key={customer.id}
               className="card"

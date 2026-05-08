@@ -1,15 +1,23 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import API from "../api/axios";
 import logo from "../assets/logo.png";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
   const handleLogin = async () => {
+    if (!email || !password) {
+      alert("Please enter email and password");
+      return;
+    }
+
+    setLoading(true);
+
     try {
       const response = await API.post(
         "/auth/login",
@@ -37,6 +45,8 @@ function Login() {
       );
 
       alert("Invalid login credentials");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -94,13 +104,19 @@ function Login() {
 
           <button
             onClick={handleLogin}
+            disabled={loading}
             className="btn btn-primary"
           >
-            Login
+            {loading ? "Signing in..." : "Login"}
           </button>
 
           <p className="muted">
             Built for a fast demo: simple, practical and AI-assisted.
+          </p>
+
+          <p className="auth-switch">
+            New to HisabKitab?{" "}
+            <Link to="/register">Create an account</Link>
           </p>
         </div>
       </section>
