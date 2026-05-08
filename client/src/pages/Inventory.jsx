@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
+import API from "../api/axios";
 import Sidebar from "../components/Sidebar";
 
 function Inventory() {
   const [items, setItems] = useState(() => {
-    const savedItems =
-      localStorage.getItem("inventory");
+    const savedItems = localStorage.getItem("inventory");
 
     if (savedItems) {
       return JSON.parse(savedItems);
@@ -39,6 +39,9 @@ function Inventory() {
   const [quantity, setQuantity] = useState("");
   const [threshold, setThreshold] = useState("");
   const [unit, setUnit] = useState("");
+  const [restockSuggestions, setRestockSuggestions] = useState([]);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState("");
 
   // SAVE TO LOCAL STORAGE
 
@@ -86,6 +89,38 @@ function Inventory() {
     );
 
     setItems(updatedItems);
+  };
+
+  // AI RESTOCK SUGGESTIONS
+
+  const getRestockSuggestions = async () => {
+    setAiLoading(true);
+    setAiError("");
+
+    try {
+      const response = await API.post("/ai/restock", {
+        inventory: items.map((item) => ({
+          itemName: item.itemName,
+          quantity: item.quantity,
+          threshold: item.threshold,
+          unit: item.unit,
+        })),
+      });
+
+      setRestockSuggestions(
+        response.data.suggestions || []
+      );
+    } catch (error) {
+      console.log(
+        "AI restock error:",
+        error.response?.data || error.message
+      );
+      setAiError(
+        "Could not get AI suggestions. Check that the server is running and GEMINI_API_KEY is set."
+      );
+    } finally {
+      setAiLoading(false);
+    }
   };
 
   return (
@@ -240,7 +275,7 @@ function Inventory() {
                   }}
                 >
                   {lowStock
-                    ? "⚠ Low Stock Alert"
+                    ? "Low Stock Alert"
                     : "Stock Healthy"}
                 </p>
 
@@ -277,14 +312,48 @@ function Inventory() {
             padding: "25px",
           }}
         >
-          <h2
+          <div
             style={{
+              display: "flex",
+              justifyContent: "space-between",
+              gap: "15px",
+              alignItems: "center",
+              flexWrap: "wrap",
               marginBottom: "20px",
-              color: "#58a6ff",
             }}
           >
-            AI Inventory Insights
-          </h2>
+            <h2
+              style={{
+                color: "#58a6ff",
+              }}
+            >
+              AI Restock Suggestions
+            </h2>
+
+            <button
+              onClick={getRestockSuggestions}
+              disabled={aiLoading || items.length === 0}
+              style={{
+                padding: "10px 18px",
+                backgroundColor:
+                  aiLoading || items.length === 0
+                    ? "#30363d"
+                    : "#238636",
+                color: "white",
+                border: "none",
+                borderRadius: "8px",
+                cursor:
+                  aiLoading || items.length === 0
+                    ? "not-allowed"
+                    : "pointer",
+                fontWeight: "bold",
+              }}
+            >
+              {aiLoading
+                ? "Asking AI..."
+                : "Get AI Suggestions"}
+            </button>
+          </div>
 
           <div
             style={{
@@ -293,14 +362,23 @@ function Inventory() {
               gap: "15px",
             }}
           >
-            {items
-              .filter(
-                (item) =>
-                  item.quantity <= item.threshold
-              )
-              .map((item) => (
+            {aiError && (
+              <div
+                style={{
+                  backgroundColor: "#2d1117",
+                  color: "#ffb3b3",
+                  padding: "15px",
+                  borderRadius: "10px",
+                  border: "1px solid #8b2635",
+                }}
+              >
+                {aiError}
+              </div>
+            )}
+
+            {!aiError &&
+              restockSuggestions.length === 0 && (
                 <div
-                  key={item.id}
                   style={{
                     backgroundColor: "#0d1117",
                     padding: "15px",
@@ -308,39 +386,50 @@ function Inventory() {
                     border: "1px solid #30363d",
                   }}
                 >
-                  ⚠ {item.itemName} stock is
-                  running low. Consider
-                  restocking soon.
+                  Click the button to ask Gemini for
+                  restock advice based on your current
+                  inventory.
                 </div>
-              ))}
+              )}
 
-            {items.length > 0 && (
-              <div
-                style={{
-                  backgroundColor: "#0d1117",
-                  padding: "15px",
-                  borderRadius: "10px",
-                  border: "1px solid #30363d",
-                }}
-              >
-                📈 Inventory usage trend
-                suggests increased demand this
-                week.
-              </div>
+            {restockSuggestions.map(
+              (suggestion, index) => (
+                <div
+                  key={`${suggestion.item}-${index}`}
+                  style={{
+                    backgroundColor: "#0d1117",
+                    padding: "15px",
+                    borderRadius: "10px",
+                    border: "1px solid #30363d",
+                  }}
+                >
+                  <strong>
+                    {suggestion.item ||
+                      "Inventory item"}
+                  </strong>
+
+                  <p style={{ marginTop: "8px" }}>
+                    Current quantity:{" "}
+                    {suggestion.currentQty ?? "N/A"}
+                  </p>
+
+                  <p>
+                    Suggested restock:{" "}
+                    {suggestion.suggestedRestock ??
+                      "N/A"}
+                  </p>
+
+                  <p
+                    style={{
+                      color: "#c9d1d9",
+                      marginTop: "8px",
+                    }}
+                  >
+                    {suggestion.reason}
+                  </p>
+                </div>
+              )
             )}
-
-            <div
-              style={{
-                backgroundColor: "#0d1117",
-                padding: "15px",
-                borderRadius: "10px",
-                border: "1px solid #30363d",
-              }}
-            >
-              💡 AI recommends maintaining
-              backup stock for fast-moving
-              items.
-            </div>
           </div>
         </div>
       </div>
