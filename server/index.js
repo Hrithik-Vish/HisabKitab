@@ -8,12 +8,16 @@ const app = express();
 app.use(cors({ origin: "http://localhost:5173" })); 
 app.use(express.json());
 
-// Core CRUD Routes
+// Core CRUD Routes (Member 2 - Hrithik)
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/orders", require("./routes/orders"));
 app.use("/api/inventory", require("./routes/inventory"));
 app.use("/api/customers", require("./routes/customers"));
 app.use("/api/payments", require("./routes/payments"));
+
+// AI & WhatsApp Routes (Member 3 - Shreyas)
+// app.use("/api/ai", require("./routes/ai"));
+// app.use("/api/whatsapp", require("./routes/whatsapp"));
 
 // Health check endpoint
 app.get("/", (req, res) => res.send("HisabKitab server running with Supabase ✅"));
