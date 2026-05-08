@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const supabase = require("../supabase");
-const verifyToken = require("../middleware/verifyToken"); // The gatekeeper
+const verifyToken = require("../middleware/verifyToken");
 
 // GET /api/orders (Fetch all orders for the logged-in user)
 router.get("/", verifyToken, async (req, res) => {

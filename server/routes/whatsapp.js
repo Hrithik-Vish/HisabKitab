@@ -2,15 +2,14 @@ const express = require("express");
 const router = express.Router();
 const twilio = require("twilio");
 const path = require("path");
+
 require("dotenv").config({ path: path.join(__dirname, "..", ".env") });
 
 function requiredEnv(name) {
   const value = process.env[name];
-
   if (!value) {
     throw new Error(`Missing ${name} in server/.env`);
   }
-
   return value;
 }
 
@@ -22,15 +21,9 @@ function getClient() {
 }
 
 function formatWhatsAppNumber(phone) {
-  if (!phone) {
-    return "";
-  }
-
+  if (!phone) { return ""; }
   const value = String(phone).trim();
-  if (value.startsWith("whatsapp:")) {
-    return value;
-  }
-
+  if (value.startsWith("whatsapp:")) { return value; }
   return `whatsapp:${value}`;
 }
 
@@ -39,10 +32,7 @@ function formatWhatsAppLinkNumber(phone) {
 }
 
 function buildReminderMessage({ customerName, amount, message }) {
-  if (message) {
-    return message;
-  }
-
+  if (message) { return message; }
   return [
     `Hello ${customerName}!`,
     "This is a reminder from HisabKitab.",
@@ -53,51 +43,6 @@ function buildReminderMessage({ customerName, amount, message }) {
 }
 
 // POST /api/whatsapp/send
-// router.post("/send", async (req, res) => {
-//   try {
-//     const { customerName, phone, amount, message } = req.body;
-
-//     if (!customerName || !phone || (!amount && !message)) {
-//       return res.status(400).json({
-//         success: false,
-//         error: "customerName, phone, and amount are required unless message is provided"
-//       });
-//     }
-
-//     const from = formatWhatsAppNumber(requiredEnv("TWILIO_WHATSAPP_FROM"));
-//     const to = formatWhatsAppNumber(phone);
-//     const body = buildReminderMessage({ customerName, amount, message });
-//     const client = getClient();
-
-//     const sentMessage = await client.messages.create({
-//       from,
-//       to,
-//       body
-//     });
-
-//     res.json({
-//       success: true,
-//       sid: sentMessage.sid,
-//       status: sentMessage.status,
-//       from,
-//       to,
-//       body,
-//       note: "Twilio accepted the message. If it is not received, check /api/whatsapp/status/:sid and make sure the recipient has joined your Twilio WhatsApp sandbox."
-//     });
-//   } catch (err) {
-//     console.error("Twilio error:", err);
-//     res.status(err.status || 500).json({
-//       success: false,
-//       error: "Failed to send WhatsApp message",
-//       details: err.message,
-//       code: err.code,
-//       moreInfo: err.moreInfo
-//     });
-//   }
-// });
-
-// POST /api/whatsapp/link
-// Creates a manual WhatsApp link with the reminder message pre-filled.
 router.post("/send", (req, res) => {
   const { customerName, phone, amount, message } = req.body;
 

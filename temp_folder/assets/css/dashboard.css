@@ -1,122 +1,74 @@
-/* =====================
-   GLOBAL LAYOUT
-===================== */
-:root{
+:root {
   --sidebar-w: 260px;
-  --sidebar-bg: #082217; /* dark green */
-  --accent: #1b6f4a;
+  --primary-dark: #0a2316;
+  --accent-green: #1b6f4a;
+  --bg-light: #f4f7f6;
+  --card-bg: #ffffff;
+  --text-main: #2d3748;
 }
 
-*{box-sizing:border-box}
-html,body{
-  height:100%;
-  margin:0;
-  font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  background:#f6f7f8;
-  color:#152a1f;
+* { box-sizing: border-box; }
+
+body {
+  background-color: var(--bg-light);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: var(--text-main);
+  margin: 0;
+  min-height: 100vh;
 }
 
-/* SIDEBAR (fixed) */
-#sidebar-container{
+.sidebar {
   position: fixed;
   left: 0;
   top: 0;
   width: var(--sidebar-w);
   height: 100vh;
-  background: var(--sidebar-bg);
+  background: var(--primary-dark);
+  padding: 20px 15px;
+  z-index: 1000;
+}
+
+.sidebar .nav-link {
+  color: rgba(255, 255, 255, 0.7);
+  padding: 12px 15px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  text-decoration: none;
+  display: block;
+}
+
+.sidebar .nav-link:hover, .sidebar .nav-link.active {
+  background: rgba(255, 255, 255, 0.1);
   color: #fff;
-  padding: 20px 14px;
-  overflow-y: auto;
-  z-index: 1100;
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
+  transform: translateX(5px);
 }
 
-/* LOGO inside sidebar */
-#sidebar-container #logo{
-  display:block;
-  width: 64px;
-  height: 64px;
-  object-fit: contain;
-  margin: 6px auto 12px auto;
+.main-content {
+  margin-left: var(--sidebar-w);
+  padding: 40px;
 }
 
-/* SIDEBAR LINKS */
-#sidebar-container .nav{
-  padding-left:0;
-  margin-top:6px;
-}
-#sidebar-container .nav-link{
-  color:#e9f6ee;
-  font-size:16px;
-  padding:10px 12px;
-  border-radius:8px;
-  display:flex;
-  align-items:center;
-  gap:10px;
-  text-decoration:none;
-}
-#sidebar-container .nav-link:hover{
-  background: rgba(255,255,255,0.04);
-  transform: translateX(6px);
+.stat-card {
+  background: var(--card-bg);
+  border-radius: 16px;
+  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+  transition: transform 0.2s;
 }
 
-/* MAIN CONTENT (to the right of sidebar) */
-.main-content{
-  margin-left: calc(var(--sidebar-w) + 20px);
-  padding: 28px;
-  min-height:100vh;
-}
+.stat-card:hover { transform: translateY(-3px); }
+.stat-card h2 { font-weight: 700; color: var(--primary-dark); margin: 0; }
 
-/* PRO BUTTON top-right */
-#proToggleBtn, #proToggleBtn:focus{
-  position: fixed;
-  right: 20px;
-  top: 16px;
-  z-index:1200;
-  border-radius:10px;
-  background: #1b6f4a;
-  color: #fff;
-  padding: 8px 14px;
-  border: none;
-  box-shadow: 0 6px 18px rgba(11,62,34,0.18);
-}
+.modal-content { border-radius: 16px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+.form-control, .form-select { padding: 12px 15px; border-radius: 8px; border: 1px solid #e2e8f0; }
+.form-control:focus, .form-select:focus { border-color: var(--accent-green); box-shadow: 0 0 0 0.25rem rgba(27, 111, 74, 0.25); }
 
-/* CARDS */
-.card{
-  border-radius:12px;
-  background:white;
-  border: 0;
-  box-shadow: 0 6px 20px rgba(12,33,20,0.06);
-  padding:18px;
-}
-.card h5{margin:0 0 6px 0;color:#344b3b;font-weight:600}
-.card h2{margin:6px 0 0 0;font-size:28px;color:#0f2b17}
+.table th { font-weight: 600; color: #4a5568; border-bottom-width: 1px; }
+.table td { border-bottom-color: #f0f4f8; }
 
-/* Buttons */
-.btn-ghost{
-  background: transparent;
-  border:1px solid #1b6f4a;
-  color: #1b6f4a;
-  padding:8px 12px;
-  border-radius:8px;
-}
-
-/* Small utilities */
-.text-muted-small{color:#6b776e;font-size:13px}
-
-/* Forms */
-.form-control{
-  padding:10px 12px;
-  border-radius:8px;
-  border:1px solid #e6efe6;
-  background:#fff;
-}
-.form-control:focus{outline:none; box-shadow: 0 4px 12px rgba(27,111,74,0.08); border-color:var(--accent);}
-
-/* responsiveness */
-@media (max-width: 992px){
-  #sidebar-container{display:none}
-  .main-content{margin-left:20px;padding:16px}
-  #proToggleBtn{right:10px}
+@media (max-width: 992px) {
+  .sidebar { display: none; }
+  .main-content { margin-left: 0; padding: 20px; }
 }
