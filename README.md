@@ -3,111 +3,146 @@
 ---
 
 ## 🚩 Problem Statement
-India has more than **60 million micro-entrepreneurs** — including tiffin providers, tutors, tailors, and shopkeepers — who still manage their businesses using **WhatsApp chats, notebooks, or memory**.  
+
+India has more than **60 million micro-entrepreneurs** — including tiffin providers, tutors, tailors, and shopkeepers — who still manage their businesses using **WhatsApp chats, notebooks, or memory**.
 
 This creates multiple challenges:
-- Orders get lost in long WhatsApp message threads.  
-- Payments are forgotten or delayed due to lack of tracking.  
-- No formal records → no access to loans or credit.  
-- Limited growth due to lack of insights and tools.  
+
+* Orders get lost in long WhatsApp message threads.
+* Payments are forgotten or delayed due to a lack of tracking.
+* No formal records → no access to loans or credit.
+* Limited growth due to a lack of insights and modern tools.
 
 ---
 
 ## 💡 Solution
-**HisabKitab** is a simple, **mobile-first AI assistant** that integrates seamlessly with entrepreneurs’ existing habits (WhatsApp + offline work) and makes business management efficient.  
 
-### Core MVP Features
-- **Dashboard** → Track orders, payments, and inventory in one place.  
-- **1-Click WhatsApp Reminders** → Send polite, pre-drafted payment reminders instantly.  
-- **Smart Restocking Suggestions** → AI/rule-based alerts for inventory management.  
-- **Offline-First** → Works without internet, syncs automatically when online.  
+**HisabKitab** is a simple, **clean web dashboard** that integrates seamlessly with entrepreneurs’ existing habits (like WhatsApp) and makes business management efficient.
+
+### Core MVP Features (Built & Working)
+
+* **Centralized Dashboard** → Track orders, payments, pending dues, and inventory in one place.
+* **1-Click WhatsApp Reminders** → Generate and send polite, pre-drafted payment reminders instantly via WhatsApp links or the Twilio API.
+* **AI-Powered Restocking & Insights** → Uses Google Gemini AI to analyze current inventory and order history, providing smart restocking thresholds and actionable business tips.
 
 ### Future Features
-- **AI-powered Insights** → Sales trends, festive demand predictions.  
-- **Marketing Toolkit** → Auto-generate posters and WhatsApp/social media messages.  
-- **Loan Eligibility Score** → Unlock financial growth opportunities.  
+
+* **Marketing Toolkit** → Auto-generate promotional posters and social media messages.
+* **Loan Eligibility Score** → Translate reliable digital ledger records into a credit indicator to unlock financial growth opportunities.
 
 ---
 
 ## 👥 Target Users
-- Tiffin providers 🍲  
-- Tailors / Boutique workers 🧵  
-- Tutors and coaching centers 📚  
-- Kirana / Fruit sellers 🧺  
-- Freelancers (electricians, plumbers, carpenters) 🛠  
+
+* Tiffin providers 🍲
+* Tailors / Boutique workers 🧵
+* Tutors and coaching centers 📚
+* Kirana / Fruit sellers 🧺
+* Freelancers (electricians, plumbers, carpenters) 🛠
 
 ---
 
 ## 📊 Revenue Model
-- **Freemium** → Basic features free.  
-- **Premium Subscription** → ₹100–200/month for analytics, AI tools, and loan support.  
-- **Fintech Partnerships** → Commission from micro-loan referrals.  
+
+* **Freemium** → Basic ledger and tracking features are free.
+* **Premium Subscription** → ₹100–200/month for advanced AI analytics and marketing tools.
+* **Fintech Partnerships** → Commission from micro-loan referrals based on ledger scores.
 
 ---
 
-## 🖼 Mockup/Wireframe (Example)
- (https://drive.google.com/file/d/1FIpvVc9s6LS17CIUDM6RElw_f5HUrkRl/view?usp=sharing)
+## 🧑‍💻 Actual Code Snippets from Our Project
 
----
+### 1. Smart WhatsApp Reminder Generator (Node.js)
 
-## 🧑‍💻 Example Code Snippets
+Instead of typing messages manually, our backend dynamically generates pre-filled WhatsApp links based on customer dues.
 
-### 1. WhatsApp Reminder (Node.js with Twilio API)
 ```javascript
-const accountSid = "your_twilio_sid";
-const authToken = "your_twilio_token";
-const client = require("twilio")(accountSid, authToken);
+// From our server/routes/whatsapp.js
+function buildReminderMessage({ customerName, amount }) {
+  return [
+    `Hello ${customerName}!`,
+    "This is a reminder from HisabKitab.",
+    `You have a pending payment of Rs.${amount}.`,
+    "Please clear it at your earliest convenience. Thank you!"
+  ].join("\n");
+}
 
-client.messages.create({
-  from: "whatsapp:+14155238886",   // Twilio WhatsApp sandbox number
-  to: "whatsapp:+9198xxxxxxx",    // Customer's WhatsApp number
-  body: "Hello! This is a reminder to clear your pending payment. - HisabKitab"
-}).then(message => console.log("Reminder sent:", message.sid))
-  .catch(error => console.error("Failed to send reminder:", error));
+router.post("/send", (req, res) => {
+  const { customerName, phone, amount } = req.body;
+  const cleanPhone = String(phone).replace(/\D/g, "");
+  const body = buildReminderMessage({ customerName, amount });
+  
+  // Generates a direct 1-click WhatsApp messaging link
+  const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(body)}`;
+  
+  res.json({ success: true, url });
+});
+
 ```
 
-### 2. Inventory Restock Alert (Python)
-```python
-inventory = {"Rice": 2, "Flour": 0, "Oil": 1}
-threshold = 1
+### 2. AI Inventory Restock Alerts (Google Gemini API)
 
-for item, qty in inventory.items():
-    if qty <= threshold:
-        print(f"⚠️ Restock Alert: {item} is running low!")
+We use Google's Gemini 2.5 Flash model to analyze current database stock and give human-readable restocking advice.
+
+```javascript
+// From our server/routes/ai.js
+router.post("/restock", async (req, res) => {
+    const { inventory } = req.body;
+    const prompt = `
+      You are a stock management assistant for a small Indian business.
+      Here is the current inventory: ${JSON.stringify(inventory)}
+      Suggest how much to restock each low item.
+      Format as JSON: { "suggestions": [...] }
+    `;
+
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const result = await model.generateContent(prompt);
+    
+    // Clean and parse the AI's JSON response to update the frontend
+    const clean = result.response.text().replace(/```json|```/g, "").trim();
+    res.json(JSON.parse(clean));
+});
+
 ```
 
 ---
 
 ## 🛠 Tech Stack
-- **Frontend**: React Native / Flutter (cross-platform mobile apps)  
-- **Backend**: Node.js with Express (API & business logic)  
-- **Database**: SQLite / Realm (offline-first local storage)  
-- **Messaging**: Twilio WhatsApp API (send reminders)  
-- **AI**: Python (forecasting models, personalization)  
-- **Syncing**: Background sync for offline-online consistency  
+
+* **Frontend**: React.js (Vite) with custom CSS for a premium dark-theme UI.
+* **Backend**: Node.js with Express framework.
+* **Database**: Supabase (PostgreSQL) for secure, real-time data storage.
+* **AI Integration**: `@google/generative-ai` (Gemini API).
+* **Messaging Integration**: Twilio WhatsApp API.
+* **Deployment Strategy**: Localhost dual-server environment for demo stability.
 
 ---
 
-## 🚀 Roadmap (Hackathon MVP)
-1. Build a simple mobile dashboard.  
-2. Implement WhatsApp reminder integration.  
-3. Add rule-based restocking alerts.  
-4. Prepare mockups for premium AI features.  
+## 🚀 Roadmap (Hackathon MVP Achieved)
+
+1. ✅ Built a clean, React-based web dashboard.
+2. ✅ Integrated Supabase for real-time customer and order tracking.
+3. ✅ Implemented 1-click WhatsApp payment reminders.
+4. ✅ Hooked up Google Gemini for smart business insights and inventory alerts.
 
 ---
 
-## 🎯 Hackathon Focus: MumbaiHacks
-At **MumbaiHacks**, HisabKitab focuses on leveraging AI to empower micro-entrepreneurs by simplifying **order/payment tracking**, enabling **offline-first usage**, and directly integrating with **WhatsApp** — delivering a practical, scalable solution.  
+## 🎯 Hackathon Focus: HackArena 2.0 Zonals Mumbai
+
+At **HackArena 2.0 Zonals Mumbai**, HisabKitab focuses on leveraging **GenAI** and standard messaging platforms to empower micro-entrepreneurs. By simplifying ledger tracking and directly integrating with **WhatsApp**, we deliver a practical, scalable solution that fits perfectly into the existing habits of Indian small business owners.
 
 ---
 
 ## 📞 Contact & Contribution
-For questions, suggestions, or contributions:  
-📧 Email: hisabkitab.ai@gmail.com 
-🌐 GitHub: [https://github.com/Hrithik-Vish/HisabKitab](https://github.com/Hrithik-Vish/HisabKitab)
 
+For questions, suggestions, or contributions:
+
+📧 Email: hisabkitab.ai@gmail.com
+
+🌐 GitHub: [https://github.com/Hrithik-Vish/HisabKitab](https://github.com/Hrithik-Vish/HisabKitab)
 
 ---
 
 ## 📜 License
+
 This project is licensed under the **MIT License**.
